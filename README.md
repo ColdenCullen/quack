@@ -1,5 +1,6 @@
 ## quack
 [![Build Status](http://img.shields.io/travis/ColdenCullen/quack/master.svg?style=flat)](https://travis-ci.org/ColdenCullen/quack)
+[![Coverage](http://img.shields.io/coveralls/ColdenCullen/quack/master.svg?style=flat)](https://coveralls.io/r/ColdenCullen/quack)
 
 A library for enabling compile-time duck typing in D.
 
