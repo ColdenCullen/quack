@@ -2,8 +2,10 @@ language: d
 os:
   - linux
   - osx
+env:
+  - secure: "NV1Ow4YXogPx/kevm0kGesSoblvgv+9z3uhzrWhDDSfTlib845b+dLJyjLY/SRfUaJ0Mew6kOnqLoyISmpe0E3KkbMDh/t+jU1ueqR/FWLsdBRcUMfkC3amJ8GS0zRnbREaAG37p6YShScCjazrf0w9opM0hzHqkXLj2kev68lk="
 install:
-  - echo $TRAVIS_OS_NAME
+  - echo $TRAVIS_OS_NAME $TRAVIS_JOB_ID
   - bash .travis/setup_linux.sh
   - bash .travis/setup_osx.sh
   - sudo dub fetch x11
@@ -13,7 +15,7 @@ install:
   - cd dub && dub build
   - cd ..
 script: sudo ./dub/bin/dub test-cov
-after_success: sudo dub run doveralls -- -p `pwd`
+after_success: sudo dub run doveralls -- -p `pwd` -t $COVERALLS_TOKEN
 notifications:
   webhooks:
     urls:
