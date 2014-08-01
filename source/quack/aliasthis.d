@@ -2,6 +2,7 @@
  * Contains definition of isAliasThis, which checks if two types
  */
 module quack.aliasthis;
+import quack.extends;
 
 /**
  * Returns true if Base has an alias this of type Parent, and as such is
@@ -14,9 +15,7 @@ module quack.aliasthis;
  * Returns:
  *      Whether Base has an alias this of Parent.
  */
-template isAliasThis( Base, Parent )
-    if( ( is( Base == class ) || is( Base == struct ) ) &&
-        ( is( Parent == class ) || is( Parent == struct ) ) )
+template isAliasThis( Base, Parent ) if( isExtendable!( Base, Parent ) )
 {
     enum isAliasThis = {
         foreach( alias_; __traits( getAliasThis, Base ) )
@@ -37,6 +36,9 @@ unittest
         A a;
         alias a this;
     }
+    struct C { }
 
     assert( isAliasThis!( B, A ) );
+    assert( !isAliasThis!( C, A ) );
+    assert( !isAliasThis!( A, C ) );
 }

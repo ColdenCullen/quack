@@ -3,4 +3,5 @@
  */
 module quack;
 public:
+import quack.extends;
 import quack.aliasthis;
