@@ -15,7 +15,7 @@ install:
   - cd dub && dub build
   - cd ..
 script: sudo ./dub/bin/dub test-cov
-after_success: sudo dub run doveralls -- -p `pwd` -t $COVERALLS_TOKEN
+after_success: sudo dub run doveralls -- -p `pwd` -j $TRAVIS_JOB_ID
 notifications:
   webhooks:
     urls:
