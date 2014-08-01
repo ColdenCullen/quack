@@ -6,7 +6,8 @@ install:
   - echo $TRAVIS_OS_NAME
   - bash .travis/setup_linux.sh
   - bash .travis/setup_osx.sh
-  - sudo dub fetch x11 doveralls
+  - sudo dub fetch x11
+  - sudo dub fetch doveralls
 script: sudo dub test
 notifications:
   webhooks:
