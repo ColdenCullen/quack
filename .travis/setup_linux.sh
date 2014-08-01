@@ -6,9 +6,4 @@
     sudo apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring;
     sudo apt-get update;
     sudo apt-get install dmd-bin dub libfreeimage-dev libjpeg62-dev
-
-    # Install libgit2
-    sudo add-apt-repository ppa:xav0989/libgit2 -y
-    sudo apt-get update
-    sudo apt-get install libgit2
 #fi
