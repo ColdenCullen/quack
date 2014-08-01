@@ -5,22 +5,22 @@ module quack.aliasthis;
 import quack.extends;
 
 /**
- * Returns true if Base has an alias this of type Parent, and as such is
+ * Returns true if Child has an alias this of type Parent, and as such is
  * implicitly convertable.
  *
  * Params:
- *      Base =          The base class to test.
+ *      Child =         The base class to test.
  *      Parent =        The parent class to test.
  *
  * Returns:
- *      Whether Base has an alias this of Parent.
+ *      Whether Child has an alias this of Parent.
  */
-template isAliasThis( Base, Parent ) if( isExtendable!( Base, Parent ) )
+template isAliasThis( Child, Parent ) if( isExtendable!( Child, Parent ) )
 {
     enum isAliasThis = {
-        foreach( alias_; __traits( getAliasThis, Base ) )
+        foreach( alias_; __traits( getAliasThis, Child ) )
         {
-            if( is( typeof( __traits( getMember, Base, alias_ ) ) : Parent ) )
+            if( is( typeof( __traits( getMember, Child, alias_ ) ) : Parent ) )
                 return true;
         }
 

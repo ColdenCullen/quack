@@ -5,18 +5,18 @@ module quack.extends;
 import quack;
 
 /**
- * Checks if Base extends Parent in any of the supported ways.
+ * Checks if Child extends Parent in any of the supported ways.
  *
  * Params:
- *      Base =          The base class to test.
+ *      Child =        The base class to test.
  *      Parent =        The parent class to test.
  *
  * Returns:
- *      Whether Base "extends" Parent.
+ *      Whether Child "extends" Parent.
  */
-template extends( Base, Parent ) if( isExtendable!( Base, Parent ) )
+template extends( Child, Parent ) if( isExtendable!( Child, Parent ) )
 {
-    enum extends = isAliasThis!( Base, Parent );
+    enum extends = isAliasThis!( Child, Parent );
 }
 ///
 unittest
