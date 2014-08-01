@@ -1,0 +1,17 @@
+language: d
+os:
+  - linux
+  - osx
+install:
+  - echo $TRAVIS_OS_NAME
+  - bash .travis/setup_linux.sh
+  - bash .travis/setup_osx.sh
+  - sudo dub fetch x11 doveralls
+script: sudo dub test
+notifications:
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/89d5205a2483bcd72a32
+    on_success: change
+    on_failure: always
+    on_start: never

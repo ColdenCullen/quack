@@ -1,8 +1,9 @@
 {
-	"name": "quack",
-	"description": "A minimal D application.",
-	"copyright": "Copyright © 2014, colden",
-	"authors": ["colden"],
-	"dependencies": {
-	}
+    "name": "quack",
+    "description": "A compile-time duck typing library for D",
+    "copyright": "Copyright © 2014, Colden Cullen",
+    "authors": [ "Colden Cullen" ],
+    "license": "MIT",
+
+    "targetType": "library"
 }
