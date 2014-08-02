@@ -3,7 +3,7 @@
  * defines all the same members of a template mixin.
  */
 module quack.mixins;
-import quack.extends;
+import quack.extends, quack.membertest;
 
 /**
  *
@@ -12,37 +12,13 @@ template hasTemplateMixin( Base, alias mix )
 {
     static if( isExtendable!Base )
     {
+        //TODO: Make sure `mixin mix!();` compiles.
         private struct MixImpl
         {
-            /*static if( __traits( compiles, mixin mix ) )
-            {*/
-                mixin mix!();
-            //}
+            mixin mix!();
         }
 
-        enum hasTemplateMixin = {
-            bool isEqual = false;
-
-            foreach( member; __traits( allMembers, MixImpl ) )
-            {
-                static if( __traits( hasMember, Base, member ) )
-                {
-                    static if( is(
-                        typeof( __traits( getMember, MixImpl, member ) ) ==
-                        typeof( __traits( getMember, Base, member ) )
-                        ) )
-                    {
-                        isEqual = true;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return isEqual;
-        } ();
+        enum hasTemplateMixin = hasSameMembers!( Base, MixImpl );
     }
     else
     {

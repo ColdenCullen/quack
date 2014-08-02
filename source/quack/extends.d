@@ -8,7 +8,7 @@ import quack;
  * Checks if Child extends Parent in any of the supported ways.
  *
  * Params:
- *      Child =        The base class to test.
+ *      Child =         The base class to test.
  *      Parent =        The parent class to test.
  *
  * Returns:
@@ -18,7 +18,8 @@ template extends( Child, Parent )
 {
     enum extends =
         is( Child : Parent ) ||
-        isAliasThis!( Child, Parent );
+        isAliasThis!( Child, Parent ) ||
+        hasSameMembers!( Child, Parent );
 }
 ///
 unittest
