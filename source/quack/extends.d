@@ -18,7 +18,7 @@ template extends( Child, Parent )
 {
     enum extends =
         is( Child : Parent ) ||
-        isAliasThis!( Child, Parent ) ||
+        hasAliasThis!( Child, Parent ) ||
         hasSameMembers!( Child, Parent );
 }
 ///

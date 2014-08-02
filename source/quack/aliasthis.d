@@ -16,7 +16,7 @@ import quack.extends;
  * Returns:
  *      Whether Child has an alias this of Parent.
  */
-enum isAliasThis( Child, Parent ) = {
+enum hasAliasThis( Child, Parent ) = {
     static if( isExtendable!( Child, Parent ) )
     {
         foreach( alias_; __traits( getAliasThis, Child ) )
@@ -39,8 +39,8 @@ unittest
     }
     struct C { }
 
-    assert( isAliasThis!( B, A ) );
-    assert( !isAliasThis!( C, A ) );
-    assert( !isAliasThis!( A, C ) );
-    assert( !isAliasThis!( float, bool ) );
+    assert( hasAliasThis!( B, A ) );
+    assert( !hasAliasThis!( C, A ) );
+    assert( !hasAliasThis!( A, C ) );
+    assert( !hasAliasThis!( float, bool ) );
 }
