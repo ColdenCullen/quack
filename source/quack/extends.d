@@ -14,7 +14,7 @@ import quack;
  * Returns:
  *      Whether Child "extends" Parent.
  */
-template extends( Child, Parent ) if( isExtendable!( Child, Parent ) )
+template extends( Child, Parent )
 {
     enum extends = isAliasThis!( Child, Parent );
 }
@@ -29,6 +29,7 @@ unittest
     assert( !extends!( S1, S2 ) );
     assert( !extends!( S1, C2 ) );
     assert( !extends!( C1, S2 ) );
+    assert( !extends!( float, bool ) );
 }
 
 /**

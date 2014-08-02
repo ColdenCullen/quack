@@ -1,5 +1,6 @@
 /**
- * Contains definition of isAliasThis, which checks if two types
+ * Contains definition of isAliasThis, which checks if one type has an alias
+ * this of the other.
  */
 module quack.aliasthis;
 import quack.extends;
@@ -15,18 +16,18 @@ import quack.extends;
  * Returns:
  *      Whether Child has an alias this of Parent.
  */
-template isAliasThis( Child, Parent ) if( isExtendable!( Child, Parent ) )
-{
-    enum isAliasThis = {
+enum isAliasThis( Child, Parent ) = {
+    static if( isExtendable!( Child, Parent ) )
+    {
         foreach( alias_; __traits( getAliasThis, Child ) )
         {
             if( is( typeof( __traits( getMember, Child, alias_ ) ) : Parent ) )
                 return true;
         }
+    }
 
-        return false;
-    } ();
-}
+    return false;
+} ();
 ///
 unittest
 {
@@ -41,4 +42,5 @@ unittest
     assert( isAliasThis!( B, A ) );
     assert( !isAliasThis!( C, A ) );
     assert( !isAliasThis!( A, C ) );
+    assert( !isAliasThis!( float, bool ) );
 }
