@@ -9,7 +9,7 @@ install:
   - sudo dub fetch x11
   - sudo dub fetch doveralls
   # Install new dub
-  - git clone https://github.com/ColdenCullen/dub
+  - git clone https://github.com/D-Programming-Language/dub
   - cd dub && dub build
   - cd ..
 script: sudo ./dub/bin/dub test --coverage
