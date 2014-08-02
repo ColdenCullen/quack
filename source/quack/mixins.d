@@ -1,12 +1,20 @@
 /**
  * Contains definition of hasTemplateMixin, which checks if a class or struct
- * defines all the same members of a template mixin.
+ * defines all the members of a template mixin, and hasStringMixin, which
+ * checks if a class or struct defines all the members of a string mixin.
  */
 module quack.mixins;
 import quack.extends, quack.membertest;
 
 /**
+ * Checks if Child extends Parent by implementing a template mixin.
  *
+ * Params:
+ *      Child =         The base class to test.
+ *      mix =           The mixin to test for.
+ *
+ * Returns:
+ *      Whether Child has all the members of mix.
  */
 template hasTemplateMixin( Base, alias mix )
 {
@@ -65,4 +73,71 @@ version( unittest )
 mixin template TestMix()
 {
     int getX() { return 42; }
+}
+
+/**
+ * Checks if Child extends Parent by implementing a string mixin.
+ *
+ * Params:
+ *      Child =         The base class to test.
+ *      mix =           The mixin to test for.
+ *
+ * Returns:
+ *      Whether Child has all the members of mix.
+ */
+template hasStringMixin( Base, string mix )
+{
+    static if( isExtendable!Base )
+    {
+        //TODO: Make sure `mixin( mix );` compiles.
+        private struct MixImpl
+        {
+            mixin( mix );
+        }
+
+        enum hasStringMixin = hasSameMembers!( Base, MixImpl );
+    }
+    else
+    {
+        enum hasStringMixin = false;
+    }
+}
+///
+unittest
+{
+    enum testMix = q{ int getX() { return 42; } };
+
+    assert( !hasStringMixin!( float, testMix ) );
+
+
+    struct TestMixStruct1
+    {
+        mixin( testMix );
+    }
+    assert( hasStringMixin!( TestMixStruct1, testMix ) );
+
+    class TestMixClass1
+    {
+        mixin( testMix );
+    }
+    assert( hasStringMixin!( TestMixClass1, testMix ) );
+
+    class TestMixClass2
+    {
+        mixin( testMix );
+        int getY() { return 43; }
+    }
+    assert( hasStringMixin!( TestMixClass2, testMix ) );
+
+    class TestMixClass3
+    {
+        int getZ() { return 44; }
+    }
+    assert( !hasStringMixin!( TestMixClass3, testMix ) );
+
+    class TestMixClass4
+    {
+        int getX() { return 45; }
+    }
+    assert( hasStringMixin!( TestMixClass4, testMix ) );
 }
