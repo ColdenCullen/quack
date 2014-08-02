@@ -16,7 +16,9 @@ import quack;
  */
 template extends( Child, Parent )
 {
-    enum extends = isAliasThis!( Child, Parent );
+    enum extends =
+        is( Child : Parent ) ||
+        isAliasThis!( Child, Parent );
 }
 ///
 unittest

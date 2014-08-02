@@ -3,43 +3,51 @@
  * defines all the same members of a template mixin.
  */
 module quack.mixins;
+import quack.extends;
 
 /**
  *
  */
 template hasTemplateMixin( Base, alias mix )
 {
-    private struct MixImpl
+    static if( isExtendable!Base )
     {
-        /*static if( __traits( compiles, mixin mix ) )
-        {*/
-            mixin mix!();
-        //}
-    }
-
-    enum hasTemplateMixin = {
-        bool isEqual = false;
-
-        foreach( member; __traits( allMembers, MixImpl ) )
+        private struct MixImpl
         {
-            static if( __traits( hasMember, Base, member ) )
-            {
-                static if( is(
-                    typeof( __traits( getMember, MixImpl, member ) ) ==
-                    typeof( __traits( getMember, Base, member ) )
-                    ) )
-                {
-                    isEqual = true;
-                }
-            }
-            else
-            {
-                return false;
-            }
+            /*static if( __traits( compiles, mixin mix ) )
+            {*/
+                mixin mix!();
+            //}
         }
 
-        return isEqual;
-    } ();
+        enum hasTemplateMixin = {
+            bool isEqual = false;
+
+            foreach( member; __traits( allMembers, MixImpl ) )
+            {
+                static if( __traits( hasMember, Base, member ) )
+                {
+                    static if( is(
+                        typeof( __traits( getMember, MixImpl, member ) ) ==
+                        typeof( __traits( getMember, Base, member ) )
+                        ) )
+                    {
+                        isEqual = true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return isEqual;
+        } ();
+    }
+    else
+    {
+        enum hasTemplateMixin = false;
+    }
 }
 ///
 unittest
