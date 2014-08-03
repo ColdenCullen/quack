@@ -118,6 +118,37 @@ unittest
     assert( ptr1.getX() == 42 );
 }
 ///
+@name( "DuckPointer Template Mixin" )
+unittest
+{
+    struct MyMixinImpl
+    {
+        mixin MyMixin!();
+    }
+    alias MixinPtr = DuckPointer!MyMixinImpl;
+
+    struct Struct1
+    {
+        mixin MyMixin!();
+    }
+
+    Struct1 s1;
+    s1.x = 42;
+    MixinPtr ptr1 = MixinPtr( &s1 );
+    assert( ptr1.x == 42 );
+    assert( ptr1.getX() == 42 );
+    ++ptr1.x;
+    assert( ptr1.x == 43 );
+    assert( ptr1.getX() == 43 );
+    assert( s1.x == 43 );
+}
+version( unittest )
+private mixin template MyMixin()
+{
+    int x;
+    int getX() { return x; }
+}
+///
 @name( "DuckPointer String Mixin" )
 unittest
 {
