@@ -4,8 +4,6 @@
 module quack.extends;
 import quack;
 
-import tested;
-
 /**
  * Checks if Child extends Parent in any of the supported ways.
  *
@@ -22,20 +20,6 @@ template extends( Child, Parent )
         is( Child : Parent ) ||
         hasAliasThis!( Child, Parent ) ||
         hasSameMembers!( Child, Parent );
-}
-///
-@name( "extends" )
-unittest
-{
-    struct S1 { }
-    struct S2 { }
-    struct C1 { }
-    struct C2 { }
-    assert( !extends!( C1, C2 ) );
-    assert( !extends!( S1, S2 ) );
-    assert( !extends!( S1, C2 ) );
-    assert( !extends!( C1, S2 ) );
-    assert( !extends!( float, bool ) );
 }
 
 /**
@@ -61,23 +45,6 @@ enum hasAliasThis( Child, Parent ) = {
 
     return false;
 } ();
-///
-@name( "hasAliasThis" )
-unittest
-{
-    struct A { }
-    struct B
-    {
-        A a;
-        alias a this;
-    }
-    struct C { }
-
-    assert( hasAliasThis!( B, A ) );
-    assert( !hasAliasThis!( C, A ) );
-    assert( !hasAliasThis!( A, C ) );
-    assert( !hasAliasThis!( float, bool ) );
-}
 
 /**
  * Checks if Child extends Parent by having a matching set of members.
@@ -136,22 +103,6 @@ template hasSameMembers( Child, Parent )
         enum hasSameMembers = false;
     }
 }
-///
-@name( "hasSameMembers" )
-unittest
-{
-    struct S1
-    {
-        @property int x() { return 42; }
-    }
-
-    struct S2
-    {
-        @property int x() { return 42; }
-    }
-
-    assert( hasSameMembers!( S1, S2 ) );
-}
 
 /**
  * Makes sure the types given can be extended.
@@ -173,19 +124,3 @@ package enum isExtendable( Classes... ) = {
 
     return true;
 } ();
-///
-@name( "isExtendable" )
-unittest
-{
-    struct S1 { }
-    struct S2 { }
-    struct C1 { }
-    struct C2 { }
-    assert( isExtendable!( S1 ) );
-    assert( isExtendable!( C1 ) );
-
-    assert( isExtendable!( S1, S2 ) );
-    assert( isExtendable!( C1, C2 ) );
-    assert( isExtendable!( S1, C2 ) );
-    assert( isExtendable!( C1, C2 ) );
-}

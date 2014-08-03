@@ -6,8 +6,6 @@
 module quack.mixins;
 import quack.extends;
 
-import tested;
-
 /**
  * Checks if Child extends Parent by implementing a template mixin.
  *
@@ -33,48 +31,6 @@ template hasTemplateMixin( Child, alias mix )
     {
         enum hasTemplateMixin = false;
     }
-}
-///
-@name( "hasTemplateMixin" )
-unittest
-{
-    assert( !hasTemplateMixin!( float, TestMix ) );
-
-    struct TestMixStruct1
-    {
-        mixin TestMix!();
-    }
-    assert( hasTemplateMixin!( TestMixStruct1, TestMix ) );
-
-    class TestMixClass1
-    {
-        mixin TestMix!();
-    }
-    assert( hasTemplateMixin!( TestMixClass1, TestMix ) );
-
-    class TestMixClass2
-    {
-        mixin TestMix!();
-        int getY() { return 43; }
-    }
-    assert( hasTemplateMixin!( TestMixClass2, TestMix ) );
-
-    class TestMixClass3
-    {
-        int getZ() { return 44; }
-    }
-    assert( !hasTemplateMixin!( TestMixClass3, TestMix ) );
-
-    class TestMixClass4
-    {
-        int getX() { return 45; }
-    }
-    assert( hasTemplateMixin!( TestMixClass4, TestMix ) );
-}
-version( unittest )
-mixin template TestMix()
-{
-    int getX() { return 42; }
 }
 
 /**
@@ -102,43 +58,4 @@ template hasStringMixin( Base, string mix )
     {
         enum hasStringMixin = false;
     }
-}
-///
-@name( "hasStringMixin" )
-unittest
-{
-    enum testMix = q{ int getX() { return 42; } };
-
-    assert( !hasStringMixin!( float, testMix ) );
-
-    struct TestMixStruct1
-    {
-        mixin( testMix );
-    }
-    assert( hasStringMixin!( TestMixStruct1, testMix ) );
-
-    class TestMixClass1
-    {
-        mixin( testMix );
-    }
-    assert( hasStringMixin!( TestMixClass1, testMix ) );
-
-    class TestMixClass2
-    {
-        mixin( testMix );
-        int getY() { return 43; }
-    }
-    assert( hasStringMixin!( TestMixClass2, testMix ) );
-
-    class TestMixClass3
-    {
-        int getZ() { return 44; }
-    }
-    assert( !hasStringMixin!( TestMixClass3, testMix ) );
-
-    class TestMixClass4
-    {
-        int getX() { return 45; }
-    }
-    assert( hasStringMixin!( TestMixClass4, testMix ) );
 }

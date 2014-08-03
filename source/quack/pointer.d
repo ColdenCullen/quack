@@ -4,8 +4,6 @@
 module quack.pointer;
 import quack.extends, quack.mixins;
 
-import tested;
-
 /**
  * Convience wrapper for creating a DuckPointer.
  */
@@ -48,12 +46,12 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
                     static if( __traits( hasMember, this, "__" ~ member ) )
                     {
                         // We store a pointer, so store that.
-                        mixin( "this.__" ~ member ) = &__traits( getMember, p, member );
+                        __traits( getMember, this, "__" ~ member ) = &__traits( getMember, p, member );
                     }
                     else
                     {
                         // No pointer, assign the reference directly.
-                        mixin( "this." ~ member ) = &__traits( getMember, p, member );
+                        __traits( getMember, this, member ) = &__traits( getMember, p, member );
                     }
                 }
             }
@@ -97,83 +95,4 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
 
         return members;
     } ();
-}
-///
-@name( "DuckPointer Structs" )
-unittest
-{
-    struct IFace1
-    {
-        int getX() { return 12; }
-    }
-    struct Struct1
-    {
-        int x;
-        int getX() { return x; }
-    }
-
-    Struct1 s1;
-    s1.x = 42;
-    DuckPointer!IFace1 ptr1 = duck!IFace1( &s1 );
-    assert( ptr1.getX() == 42 );
-}
-///
-@name( "DuckPointer Template Mixin" )
-unittest
-{
-    struct MyMixinImpl
-    {
-        mixin MyMixin!();
-    }
-    alias MixinPtr = DuckPointer!MyMixinImpl;
-
-    struct Struct1
-    {
-        mixin MyMixin!();
-    }
-
-    Struct1 s1;
-    s1.x = 42;
-    MixinPtr ptr1 = MixinPtr( &s1 );
-    assert( ptr1.x == 42 );
-    assert( ptr1.getX() == 42 );
-    ++ptr1.x;
-    assert( ptr1.x == 43 );
-    assert( ptr1.getX() == 43 );
-    assert( s1.x == 43 );
-}
-version( unittest )
-private mixin template MyMixin()
-{
-    int x;
-    int getX() { return x; }
-}
-///
-@name( "DuckPointer String Mixin" )
-unittest
-{
-    enum myMixin = q{
-        int x;
-        int getX() { return x; }
-    };
-    struct MyMixinImpl
-    {
-        mixin( myMixin );
-    }
-    alias MixinPtr = DuckPointer!MyMixinImpl;
-
-    struct Struct1
-    {
-        mixin( myMixin );
-    }
-
-    Struct1 s1;
-    s1.x = 42;
-    MixinPtr ptr1 = MixinPtr( &s1 );
-    assert( ptr1.x == 42 );
-    assert( ptr1.getX() == 42 );
-    ++ptr1.x;
-    assert( ptr1.x == 43 );
-    assert( ptr1.getX() == 43 );
-    assert( s1.x == 43 );
 }
