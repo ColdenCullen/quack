@@ -18,12 +18,16 @@ import tested;
  * Returns:
  *      Whether Child has all the members of mix.
  */
-template hasTemplateMixin( Base, alias mix )
+template hasTemplateMixin( Child, alias mix )
 {
-    static if( isExtendable!Base )
+    static if( isExtendable!Child )
     {
-        mixin( ImplementTemplateMixin!q{mix} );
-        enum hasTemplateMixin = hasSameMembers!( Base, MixinImpl );
+        struct MixinImpl
+        {
+            mixin mix!();
+        }
+
+        enum hasTemplateMixin = hasSameMembers!( Child, MixinImpl );
     }
     else
     {
@@ -87,7 +91,11 @@ template hasStringMixin( Base, string mix )
 {
     static if( isExtendable!Base )
     {
-        mixin( ImplementStringMixin!q{mix} );
+        struct MixinImpl
+        {
+            mixin( mix );
+        }
+
         enum hasStringMixin = hasSameMembers!( Base, MixinImpl );
     }
     else
@@ -134,20 +142,3 @@ unittest
     }
     assert( hasStringMixin!( TestMixClass4, testMix ) );
 }
-
-import std.string: replace;
-/// Implements a string mixin.
-package enum ImplementTemplateMixin( string MixinName ) = q{
-    struct MixinImpl
-    {
-        mixin $MixinName!();
-    }
-}.replace( "$MixinName", MixinName );
-
-/// Implements a string mixin.
-package enum ImplementStringMixin( string MixinName ) = q{
-    struct MixinImpl
-    {
-        mixin( $MixinName );
-    }
-}.replace( "$MixinName", MixinName );
