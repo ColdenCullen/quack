@@ -5,3 +5,4 @@ module quack;
 public:
 import quack.extends;
 import quack.mixins;
+import quack.pointer;
