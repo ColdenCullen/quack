@@ -4,6 +4,8 @@
 module quack.pointer;
 import quack.extends, quack.mixins;
 
+import tested;
+
 /**
  * Convience wrapper for creating a DuckPointer.
  */
@@ -73,6 +75,7 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
     } ();
 }
 ///
+@name( "DuckPointer" )
 unittest
 {
     struct IFace1
@@ -89,38 +92,4 @@ unittest
     s1.x = 42;
     DuckPointer!IFace1 ptr1 = duck!IFace1( &s1 );
     assert( ptr1.getX() == 42 );
-}
-
-/**
- * Pointer to any type that has a template mixin.
- *
- * Params:
- *  Mixin =             The mixin we're testing.
- */
-template DuckPointer( alias Mixin ) if( !isExtendable!Mixin )
-{
-    mixin( ImplementTemplateMixin!Mixin );
-    alias DuckPointer = DuckPointer!MixinImpl;
-}
-///
-unittest
-{
-
-}
-
-/**
- * Pointer to any type that has a string mixin.
- *
- * Params:
- *  Mixin =             The mixin we're testing.
- */
-template DuckPointer( string Mixin )
-{
-    mixin( ImplementStringMixin!Mixin );
-    alias DuckPointer = DuckPointer!MixinImpl;
-}
-///
-unittest
-{
-    
 }

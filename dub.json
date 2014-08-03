@@ -5,5 +5,9 @@
     "authors": [ "Colden Cullen" ],
     "license": "MIT",
 
-    "targetType": "library"
+    "targetType": "library",
+
+    "dependencies": {
+        "tested": "~>0.9"
+    }
 }

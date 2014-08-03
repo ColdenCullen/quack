@@ -6,6 +6,8 @@
 module quack.mixins;
 import quack.extends;
 
+import tested;
+
 /**
  * Checks if Child extends Parent by implementing a template mixin.
  *
@@ -29,6 +31,7 @@ template hasTemplateMixin( Base, alias mix )
     }
 }
 ///
+@name( "hasTemplateMixin" )
 unittest
 {
     assert( !hasTemplateMixin!( float, TestMix ) );
@@ -93,6 +96,7 @@ template hasStringMixin( Base, string mix )
     }
 }
 ///
+@name( "hasStringMixin" )
 unittest
 {
     enum testMix = q{ int getX() { return 42; } };
