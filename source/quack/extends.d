@@ -158,7 +158,7 @@ unittest
 package enum isExtendable( Classes... ) = {
     foreach( klass; Classes )
     {
-        if( !is( klass == struct ) && !is( klass == class ) )
+        if( !is( klass == struct ) && !is( klass == class ) && !is( klass == interface ) )
         {
             return false;
         }

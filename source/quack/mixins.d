@@ -20,13 +20,8 @@ template hasTemplateMixin( Base, alias mix )
 {
     static if( isExtendable!Base )
     {
-        struct MixinImpl( alias Mixin )
-        {
-            //TODO: Make sure `mixin mix!();` compiles.
-            mixin Mixin!();
-        }
-
-        enum hasTemplateMixin = hasSameMembers!( Base, MixinImpl!mix );
+        mixin( ImplementTemplateMixin!q{mix} );
+        enum hasTemplateMixin = hasSameMembers!( Base, MixinImpl );
     }
     else
     {
@@ -89,13 +84,8 @@ template hasStringMixin( Base, string mix )
 {
     static if( isExtendable!Base )
     {
-        struct MixinImpl( string Mixin )
-        {
-            //TODO: Make sure `mixin( mix );` compiles.
-            mixin( Mixin );
-        }
-
-        enum hasStringMixin = hasSameMembers!( Base, MixinImpl!mix );
+        mixin( ImplementStringMixin!q{mix} );
+        enum hasStringMixin = hasSameMembers!( Base, MixinImpl );
     }
     else
     {
@@ -140,3 +130,20 @@ unittest
     }
     assert( hasStringMixin!( TestMixClass4, testMix ) );
 }
+
+import std.string: replace;
+/// Implements a string mixin.
+package enum ImplementTemplateMixin( string MixinName ) = q{
+    struct MixinImpl
+    {
+        mixin $MixinName!();
+    }
+}.replace( "$MixinName", MixinName );
+
+/// Implements a string mixin.
+package enum ImplementStringMixin( string MixinName ) = q{
+    struct MixinImpl
+    {
+        mixin( $MixinName );
+    }
+}.replace( "$MixinName", MixinName );
