@@ -115,11 +115,13 @@ template hasSameMembers( Child, Parent )
                                 typeof( __traits( getMember, Child, member ) )
                                 ) )
                             {
+                                //pragma( msg, "Member type mismatch " ~ Child.stringof ~ ":" ~ member ~ "::" ~ typeof(__traits( getMember, Parent, member )).stringof );
                                 return false;
                             }
                         }
                         else
                         {
+                            //pragma( msg, "Member missing " ~ Child.stringof ~ ":" ~ member );
                             return false;
                         }
                     }
