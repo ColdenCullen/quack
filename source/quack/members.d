@@ -1,7 +1,7 @@
 /**
  *
  */
-module quack.membertest;
+module quack.members;
 import quack.extends;
 
 import std.algorithm: among;
@@ -16,9 +16,9 @@ import std.algorithm: among;
  * Returns:
  *      Whether Child has all the members of Parent.
  */
-template hasSameMembers( Base, Parent )
+template hasSameMembers( Child, Parent )
 {
-    static if( isExtendable!( Base, Parent ) )
+    static if( isExtendable!( Child, Parent ) )
     {
         enum hasSameMembers = {
             // If there are no members to check, return false.
@@ -31,14 +31,14 @@ template hasSameMembers( Base, Parent )
                 foreach( member; __traits( allMembers, Parent ) )
                 {
                     // Ignore some members.
-                    static if( !member.among( "this" ) )
+                    static if( !member.among( "this", "~this" ) )
                     {
-                        // If Base has the member, check the type.
-                        static if( __traits( hasMember, Base, member ) )
+                        // If Child has the member, check the type.
+                        static if( __traits( hasMember, Child, member ) )
                         {
                             static if( !is(
                                 typeof( __traits( getMember, Parent, member ) ) ==
-                                typeof( __traits( getMember, Base, member ) )
+                                typeof( __traits( getMember, Child, member ) )
                                 ) )
                             {
                                 return false;

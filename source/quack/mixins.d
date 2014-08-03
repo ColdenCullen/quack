@@ -4,7 +4,7 @@
  * checks if a class or struct defines all the members of a string mixin.
  */
 module quack.mixins;
-import quack.extends, quack.membertest;
+import quack.extends, quack.members;
 
 /**
  * Checks if Child extends Parent by implementing a template mixin.
@@ -20,13 +20,13 @@ template hasTemplateMixin( Base, alias mix )
 {
     static if( isExtendable!Base )
     {
-        //TODO: Make sure `mixin mix!();` compiles.
-        private struct MixImpl
+        struct MixinImpl( alias Mixin )
         {
-            mixin mix!();
+            //TODO: Make sure `mixin mix!();` compiles.
+            mixin Mixin!();
         }
 
-        enum hasTemplateMixin = hasSameMembers!( Base, MixImpl );
+        enum hasTemplateMixin = hasSameMembers!( Base, MixinImpl!mix );
     }
     else
     {
@@ -89,13 +89,13 @@ template hasStringMixin( Base, string mix )
 {
     static if( isExtendable!Base )
     {
-        //TODO: Make sure `mixin( mix );` compiles.
-        private struct MixImpl
+        struct MixinImpl( string Mixin )
         {
-            mixin( mix );
+            //TODO: Make sure `mixin( mix );` compiles.
+            mixin( Mixin );
         }
 
-        enum hasStringMixin = hasSameMembers!( Base, MixImpl );
+        enum hasStringMixin = hasSameMembers!( Base, MixinImpl!mix );
     }
     else
     {
@@ -108,7 +108,6 @@ unittest
     enum testMix = q{ int getX() { return 42; } };
 
     assert( !hasStringMixin!( float, testMix ) );
-
 
     struct TestMixStruct1
     {
