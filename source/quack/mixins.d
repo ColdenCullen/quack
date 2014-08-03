@@ -4,7 +4,7 @@
  * checks if a class or struct defines all the members of a string mixin.
  */
 module quack.mixins;
-import quack.extends, quack.members;
+import quack.extends;
 
 /**
  * Checks if Child extends Parent by implementing a template mixin.

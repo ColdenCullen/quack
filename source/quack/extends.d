@@ -36,6 +36,117 @@ unittest
 }
 
 /**
+ * Returns true if Child has an alias this of type Parent, and as such is
+ * implicitly convertable.
+ *
+ * Params:
+ *      Child =         The base class to test.
+ *      Parent =        The parent class to test.
+ *
+ * Returns:
+ *      Whether Child has an alias this of Parent.
+ */
+enum hasAliasThis( Child, Parent ) = {
+    static if( isExtendable!( Child, Parent ) )
+    {
+        foreach( alias_; __traits( getAliasThis, Child ) )
+        {
+            if( is( typeof( __traits( getMember, Child, alias_ ) ) : Parent ) )
+                return true;
+        }
+    }
+
+    return false;
+} ();
+///
+unittest
+{
+    struct A { }
+    struct B
+    {
+        A a;
+        alias a this;
+    }
+    struct C { }
+
+    assert( hasAliasThis!( B, A ) );
+    assert( !hasAliasThis!( C, A ) );
+    assert( !hasAliasThis!( A, C ) );
+    assert( !hasAliasThis!( float, bool ) );
+}
+
+/**
+ * Checks if Child extends Parent by having a matching set of members.
+ *
+ * Params:
+ *      Child =         The base class to test.
+ *      Parent =        The parent class to test.
+ *
+ * Returns:
+ *      Whether Child has all the members of Parent.
+ */
+template hasSameMembers( Child, Parent )
+{
+    static if( isExtendable!( Child, Parent ) )
+    {
+        enum hasSameMembers = {
+            // If there are no members to check, return false.
+            static if( [__traits( allMembers, Parent )].length == 0 )
+            {
+                return false;
+            }
+            else
+            {
+                foreach( member; __traits( allMembers, Parent ) )
+                {
+                    import std.algorithm: among;
+                    // Ignore some members.
+                    static if( !member.among( "this", "~this" ) )
+                    {
+                        // If Child has the member, check the type.
+                        static if( __traits( hasMember, Child, member ) )
+                        {
+                            static if( !is(
+                                typeof( __traits( getMember, Parent, member ) ) ==
+                                typeof( __traits( getMember, Child, member ) )
+                                ) )
+                            {
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        } ();
+    }
+    else
+    {
+        enum hasSameMembers = false;
+    }
+}
+///
+unittest
+{
+    struct S1
+    {
+        @property int x() { return 42; }
+    }
+
+    struct S2
+    {
+        @property int x() { return 42; }
+    }
+
+    assert( hasSameMembers!( S1, S2 ) );
+}
+
+/**
  * Makes sure the types given can be extended.
  *
  * Params:
