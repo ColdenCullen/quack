@@ -67,6 +67,10 @@ unittest
 @name( "extends" )
 unittest
 {
+    class Class1 { }
+    class Class2 : Class1 { }
+
+    assert( extends!( Class2, Class1 ) );
     assert( !extends!( EmptyStruct1, EmptyStruct2 ) );
     assert( !extends!( float, bool ) );
 }
