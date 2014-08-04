@@ -11,73 +11,66 @@ import quack;
 version( Have_tested ) import tested;
 else struct name { string name; }
 
-@name( "extends" )
+mixin template TemplateMixin1()
+{
+    void methodTemplate() { }
+}
+mixin template TemplateMixin2()
+{
+    int x;
+    int getX() { return x; }
+}
+enum stringMixin1 = q{ void methodString() { } };
+
+struct EmptyStruct1 { }
+struct EmptyStruct2 { }
+struct AliasThisHolder
+{
+    EmptyStruct1 e1;
+    alias e1 this;
+}
+struct StructWithMethod1
+{
+    void method();
+}
+struct StructWithMethod2
+{
+    void method();
+}
+
+@name( "isExtendable" )
 unittest
 {
-    struct S1 { }
-    struct S2 { }
-    struct C1 { }
-    struct C2 { }
-    assert( !extends!( C1, C2 ) );
-    assert( !extends!( S1, S2 ) );
-    assert( !extends!( S1, C2 ) );
-    assert( !extends!( C1, S2 ) );
-    assert( !extends!( float, bool ) );
+    assert( isExtendable!( EmptyStruct1 ) );
+    assert( isExtendable!( EmptyStruct2, AliasThisHolder ) );
+    assert( !isExtendable!( EmptyStruct1, float ) );
+    assert( !isExtendable!( bool ) );
 }
 
 @name( "hasAliasThis" )
 unittest
 {
-    struct A { }
-    struct B
-    {
-        A a;
-        alias a this;
-    }
-    struct C { }
-
-    assert( hasAliasThis!( B, A ) );
-    assert( !hasAliasThis!( C, A ) );
-    assert( !hasAliasThis!( A, C ) );
+    assert( hasAliasThis!( AliasThisHolder, EmptyStruct1 ) );
+    assert( !hasAliasThis!( EmptyStruct1, AliasThisHolder ) );
+    assert( !hasAliasThis!( EmptyStruct2, EmptyStruct1 ) );
+    assert( !hasAliasThis!( EmptyStruct1, EmptyStruct2 ) );
     assert( !hasAliasThis!( float, bool ) );
 }
 
 @name( "hasSameMembers" )
 unittest
 {
-    struct S1
-    {
-        @property int x();
-    }
-
-    struct S2
-    {
-        @property int x();
-    }
-
-    assert( hasSameMembers!( S1, S2 ) );
+    assert( hasSameMembers!( StructWithMethod1, StructWithMethod2 ) );
+    assert( hasSameMembers!( StructWithMethod2, StructWithMethod1 ) );
 }
 
-@name( "isExtendable" )
+@name( "extends" )
 unittest
 {
-    struct S1 { }
-    struct S2 { }
-    struct C1 { }
-    struct C2 { }
-    assert( isExtendable!( S1 ) );
-    assert( isExtendable!( C1 ) );
-
-    assert( isExtendable!( S1, S2 ) );
-    assert( isExtendable!( C1, C2 ) );
-    assert( isExtendable!( S1, C2 ) );
-    assert( isExtendable!( C1, C2 ) );
+    assert( !extends!( EmptyStruct1, EmptyStruct2 ) );
+    assert( !extends!( float, bool ) );
 }
 
-mixin template TemplateMixin1()
-{
-    int getX() { return 42; }
-}
 @name( "hasTemplateMixin" )
 unittest
 {
@@ -110,7 +103,7 @@ unittest
 
     class TestMixClass4
     {
-        int getX() { return 45; }
+        void methodTemplate() { }
     }
     assert( hasTemplateMixin!( TestMixClass4, TemplateMixin1 ) );
 }
@@ -118,40 +111,38 @@ unittest
 @name( "hasStringMixin" )
 unittest
 {
-    enum testMix = q{ int getX() { return 42; } };
-
-    assert( !hasStringMixin!( float, testMix ) );
+    assert( !hasStringMixin!( float, stringMixin1 ) );
 
     struct TestMixStruct1
     {
-        mixin( testMix );
+        mixin( stringMixin1 );
     }
-    assert( hasStringMixin!( TestMixStruct1, testMix ) );
+    assert( hasStringMixin!( TestMixStruct1, stringMixin1 ) );
 
     class TestMixClass1
     {
-        mixin( testMix );
+        mixin( stringMixin1 );
     }
-    assert( hasStringMixin!( TestMixClass1, testMix ) );
+    assert( hasStringMixin!( TestMixClass1, stringMixin1 ) );
 
     class TestMixClass2
     {
-        mixin( testMix );
+        mixin( stringMixin1 );
         int getY() { return 43; }
     }
-    assert( hasStringMixin!( TestMixClass2, testMix ) );
+    assert( hasStringMixin!( TestMixClass2, stringMixin1 ) );
 
     class TestMixClass3
     {
         int getZ() { return 44; }
     }
-    assert( !hasStringMixin!( TestMixClass3, testMix ) );
+    assert( !hasStringMixin!( TestMixClass3, stringMixin1 ) );
 
     class TestMixClass4
     {
-        int getX() { return 45; }
+        void methodString() { }
     }
-    assert( hasStringMixin!( TestMixClass4, testMix ) );
+    assert( hasStringMixin!( TestMixClass4, stringMixin1 ) );
 }
 
 @name( "DuckPointer Structs" )
@@ -178,11 +169,6 @@ unittest
     ptr1.destroy();
 }
 
-mixin template TemplateMixin2()
-{
-    int x;
-    int getX() { return x; }
-}
 @name( "DuckPointer Template Mixin" )
 unittest
 {
