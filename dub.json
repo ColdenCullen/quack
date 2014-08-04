@@ -4,10 +4,10 @@
     "copyright": "Copyright © 2014, Colden Cullen",
     "authors": [ "Colden Cullen" ],
     "license": "MIT",
-    
+
     "targetType": "library",
 
     "dependencies": {
-        "tested": "~>0.9"
+        "tested": { "version": "~>0.9", "optional": true }
     }
 }

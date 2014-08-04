@@ -3,7 +3,11 @@
  */
 module quack.test;
 version( unittest ):
-import quack, tested;
+import quack;
+
+// Suppport for optional package tested.
+version( Have_tested ) import tested;
+else struct name { string name; }
 
 @name( "extends" )
 unittest

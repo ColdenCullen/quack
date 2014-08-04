@@ -6,7 +6,7 @@ install:
   - echo $TRAVIS_OS_NAME $TRAVIS_JOB_ID
   - bash .travis/setup_linux.sh
   - bash .travis/setup_osx.sh
-  - sudo dub fetch x11
+  - sudo dub fetch tested
   - sudo dub fetch doveralls
   # Install new dub
   - git clone https://github.com/D-Programming-Language/dub
