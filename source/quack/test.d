@@ -154,17 +154,21 @@ unittest
     struct IFace1
     {
         int getX() { return 12; }
+        void doWork() pure @safe nothrow { }
     }
     struct Struct1
     {
         int x;
         int getX() { return x; }
+        void doWork() pure @safe nothrow { ++x; }
     }
 
     Struct1 s1;
     s1.x = 42;
     DuckPointer!IFace1 ptr1 = duck!IFace1( &s1 );
     assert( ptr1.getX() == 42 );
+    ptr1.doWork();
+    assert( ptr1.getX() == 43 );
 }
 
 mixin template TemplateMixin2()

@@ -31,6 +31,7 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
     public:
         mixin( ImplementMembers );
 
+        @disable this();
         this( Pointer )( Pointer* p )
         {
             impl = cast(void*)p;
@@ -43,27 +44,21 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
                 import std.traits: isSomeFunction;
                 static if( !member.among( "this", "~this" ) )
                 {
-                    static if( __traits( hasMember, this, "__" ~ member ) )
-                    {
-                        // We store a pointer, so store that.
-                        __traits( getMember, this, "__" ~ member ) = &__traits( getMember, p, member );
-                    }
-                    else
-                    {
-                        // No pointer, assign the reference directly.
-                        __traits( getMember, this, member ) = &__traits( getMember, p, member );
-                    }
+                    // We store a pointer, so store that.
+                    __traits( getMember, this, "__" ~ member ) = &__traits( getMember, p, member );
                 }
             }
         }
 
-        ~this()
+        void destroy()
         {
             destroyer( impl );
         }
 
     private:
+        /// The actual pointer. Unnecessary except for destroyer.
         void* impl;
+        /// Calls the proper destory function.
         void function( void* ) destroyer;
     }
 
@@ -77,18 +72,39 @@ template DuckPointer( Pointee ) if( isExtendable!Pointee )
             import std.string: replace;
             static if( !member.among( "this", "~this" ) )
             {
+                // Whether this member is a function or not.
+                // Can't get address of data member without this pointer.
+                enum isFunction = __traits( compiles, &__traits( getMember, Pointee, member ) );
+
                 // If member is a field, this'll fail citing a need for a `this` pointer.
-                static if( __traits( compiles, &__traits( getMember, Pointee, member ) ) )
+                static if( isFunction )
                 {
-                    members ~= "public " ~ typeof( &__traits( getMember, Pointee, member ) ).stringof.replace( "function", "delegate" ) ~
-                                " " ~ member ~ ";";
+                    // The name of the variable type.
+                    enum typeName = typeof( &__traits( getMember, Pointee, member ) ).stringof.replace( "function", "delegate" ) ;
+
+                    // Pointer to member, passthrough function.
+                    members ~= q{
+                        private $type __$member;
+                        public auto $member( Args... )( Args args )
+                            if( __traits( compiles, __$member( args ) ) )
+                        {
+                            return __$member( args );
+                        }
+                    }.replace( "$member", member ).replace( "$type", typeName );
                 }
                 else
                 {
-                    // If it's a var, store a pointer to it, and return a reference to the dereferenced pointer.
-                    members ~= "private " ~ typeof( __traits( getMember, Pointee, member ) ).stringof ~ "* __" ~ member ~ ";";
-                    members ~= "public @property ref " ~ typeof( __traits( getMember, Pointee, member ) ).stringof ~ " " ~ member ~ "() {
-                        return *__" ~ member ~ "; }";
+                    // The name of the variable type.
+                    enum typeName = typeof( __traits( getMember, Pointee, member ) ).stringof;
+
+                    // Pointer to member, function returning ref.
+                    members ~= q{
+                        private $type* __$member;
+                        public @property ref $type $member()
+                        {
+                            return *__$member;
+                        }
+                    }.replace( "$member", member ).replace( "$type", typeName );
                 }
             }
         }
