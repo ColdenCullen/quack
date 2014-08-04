@@ -3,6 +3,8 @@
  */
 module quack.test;
 version( unittest ):
+private:
+
 import quack;
 
 // Suppport for optional package tested.
