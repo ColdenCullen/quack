@@ -41,12 +41,12 @@ unittest
 {
     struct S1
     {
-        @property int x() { return 42; }
+        @property int x();
     }
 
     struct S2
     {
-        @property int x() { return 42; }
+        @property int x();
     }
 
     assert( hasSameMembers!( S1, S2 ) );
@@ -169,6 +169,7 @@ unittest
     assert( ptr1.getX() == 42 );
     ptr1.doWork();
     assert( ptr1.getX() == 43 );
+    ptr1.destroy();
 }
 
 mixin template TemplateMixin2()
