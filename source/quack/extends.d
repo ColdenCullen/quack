@@ -59,11 +59,17 @@ enum hasAliasThis( Child, Parent, string file = __FILE__, size_t line = __LINE__
 template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __LINE__ )
 {
     import std.algorithm: among;
+    import std.string: replace;
     import std.traits;
     debug( quack ) import std.conv: to;
 
     static if( isExtendable!( Child, Parent ) )
     {
+        enum error( string msg ) = q{
+            debug( quack ) pragma( msg, memberMismatchError!( Child, member, "$msg", file, line ) );
+            return false;
+        }.replace( "$msg", msg );
+
         enum hasSameMembers = {
             // If there are no members to check, return false.
             static if( [__traits( allMembers, Parent )].length == 0 )
@@ -75,74 +81,68 @@ template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __
                 foreach( member; __traits( allMembers, Parent ) )
                 {
                     // Ignore some members.
-                    static if( !member.among( "this", "~this", "Monitor" ) )
+                    static if( member.among( "this", "~this", "Monitor" ) )
                     {
-                        // If Child has the member, check the type.
-                        static if( __traits( hasMember, Child, member ) )
-                        {
-                            // If member, make sure they are the same type.
-                            static if( !is(
-                                typeof( __traits( getMember, Parent, member ) ) ==
-                                typeof( __traits( getMember, Child, member ) ) ) )
-                            {
-                                // If function and type mismatch, check components for validity.
-                                static if( isSomeFunction!( __traits( getMember, Parent, member ) ) )
-                                {
-                                    // Check for return type mismatch.
-                                    static if( !is( ReturnType!( __traits( getMember, Child, member ) ) ==
-                                                    ReturnType!( __traits( getMember, Parent, member ) ) ) )
-                                    {
-                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Return type mismatch.", file, line ) );
-                                        return false;
-                                    }
+                        continue;
+                    } else {
 
-                                    // Check for parameter type mismatch.
-                                    static if( !is( ParameterTypeTuple!( __traits( getMember, Child, member ) ) ==
-                                                    ParameterTypeTuple!( __traits( getMember, Parent, member ) ) ) )
-                                    {
-                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Parameter type mismatch.", file, line ) );
-                                        return false;
-                                    }
+                    // If Child has the member, check the type.
+                    static if( !__traits( hasMember, Child, member ) )
+                    {
+                        mixin( error!"Member missing." );
+                    } else {
 
-                                    // Check for attribute mismatch.
-                                    enum childAttr = functionAttributes!( __traits( getMember, Child, member ) );
-                                    enum parentAttr = functionAttributes!( __traits( getMember, Parent, member ) );
-                                    static if( childAttr == FunctionAttribute.none && parentAttr != FunctionAttribute.none )
-                                    {
-                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member,
-                                            "Attribute mismatch: " ~ extractFlags!( FunctionAttribute, childAttr ).to!string ~
-                                            ":" ~ extractFlags!( FunctionAttribute, parentAttr ).to!string, file, line ) );
-                                        return false;
-                                    } else {
+                    // If member, make sure they are the same type.
+                    static if( is(
+                        typeof( __traits( getMember, Parent, member ) ) ==
+                        typeof( __traits( getMember, Child, member ) ) ) )
+                    {
+                        return true;
+                    } else {
 
-                                    // Check for safety.
-                                    static if( isSafe!( __traits( getMember, Parent, member ) ) && isUnsafe!( __traits( getMember, Child, member ) ) )
-                                    {
-                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Function safety mismatch.", file, line ) );
-                                        return false;
-                                    } else {
+                    // If not function, give up.
+                    static if( !isSomeFunction!( __traits( getMember, Parent, member ) ) )
+                    {
+                        mixin( error!"Type mismatch." );
+                    } else {
 
-                                    // Check for @property.
-                                    static if( ( parentAttr & FunctionAttribute.property ) && !( childAttr & FunctionAttribute.property ) )
-                                    {
-                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "@property mismatch.", file, line ) );
-                                        return false;
-                                    }
-                                    } }
-                                }
-                                else
-                                {
-                                    debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Type mismatch.", file, line ) );
-                                    return false;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Member missing.", file, line ) );
-                            return false;
-                        }
+                    // Check for return type mismatch.
+                    static if( !is( ReturnType!( __traits( getMember, Child, member ) ) ==
+                                    ReturnType!( __traits( getMember, Parent, member ) ) ) )
+                    {
+                        mixin( error!"Return type mismatch." );
+                    } else {
+
+                    // Check for parameter type mismatch.
+                    static if( !is( ParameterTypeTuple!( __traits( getMember, Child, member ) ) ==
+                                    ParameterTypeTuple!( __traits( getMember, Parent, member ) ) ) )
+                    {
+                        mixin( error!"Parameter type mismatch." );
+                    } else {
+
+                    // Check for attribute mismatch.
+                    enum childAttr = functionAttributes!( __traits( getMember, Child, member ) );
+                    enum parentAttr = functionAttributes!( __traits( getMember, Parent, member ) );
+                    static if( childAttr == FunctionAttribute.none && parentAttr != FunctionAttribute.none )
+                    {
+                        mixin( error!( "Attribute mismatch: " ~ extractFlags!( FunctionAttribute, childAttr ).to!string ~
+                            ":" ~ extractFlags!( FunctionAttribute, parentAttr ).to!string ) );
+                    } else {
+
+                    // Check for safety.
+                    static if( isSafe!( __traits( getMember, Parent, member ) ) && isUnsafe!( __traits( getMember, Child, member ) ) )
+                    {
+                        mixin( error!"Function safety mismatch." );
+                    } else {
+
+                    // Check for @property.
+                    static if( ( parentAttr & FunctionAttribute.property ) && !( childAttr & FunctionAttribute.property ) )
+                    {
+                        mixin( error!"@property mismatch." );
                     }
+
+                    // This sucks, but is required to avoid "statement is not reachable" warning.
+                    } } } } } } } }
                 }
 
                 return true;
