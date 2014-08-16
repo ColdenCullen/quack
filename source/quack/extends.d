@@ -2,7 +2,7 @@
  *
  */
 module quack.extends;
-import quack;
+import quack, quack.debughelpers;
 
 /**
  * Checks if Child extends Parent in any of the supported ways.
@@ -14,12 +14,12 @@ import quack;
  * Returns:
  *      Whether Child "extends" Parent.
  */
-template extends( Child, Parent )
+template extends( Child, Parent, string file = __FILE__, size_t line = __LINE__ )
 {
     enum extends =
         is( Child : Parent ) ||
-        hasAliasThis!( Child, Parent ) ||
-        hasSameMembers!( Child, Parent );
+        hasAliasThis!( Child, Parent, file, line ) ||
+        hasSameMembers!( Child, Parent, file, line );
 }
 
 /**
@@ -33,7 +33,7 @@ template extends( Child, Parent )
  * Returns:
  *      Whether Child has an alias this of Parent.
  */
-enum hasAliasThis( Child, Parent ) = {
+enum hasAliasThis( Child, Parent, string file = __FILE__, size_t line = __LINE__ ) = {
     static if( isExtendable!( Child, Parent ) )
     {
         foreach( alias_; __traits( getAliasThis, Child ) )
@@ -56,8 +56,12 @@ enum hasAliasThis( Child, Parent ) = {
  * Returns:
  *      Whether Child has all the members of Parent.
  */
-template hasSameMembers( Child, Parent )
+template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __LINE__ )
 {
+    import std.algorithm: among;
+    import std.traits;
+    debug( quack ) import std.conv: to;
+
     static if( isExtendable!( Child, Parent ) )
     {
         enum hasSameMembers = {
@@ -70,25 +74,24 @@ template hasSameMembers( Child, Parent )
             {
                 foreach( member; __traits( allMembers, Parent ) )
                 {
-                    import std.algorithm: among;
                     // Ignore some members.
-                    static if( !member.among( "this", "~this" ) )
+                    static if( !member.among( "this", "~this", "Monitor" ) )
                     {
                         // If Child has the member, check the type.
                         static if( __traits( hasMember, Child, member ) )
                         {
+                            // If member, make sure they are the same type.
                             static if( !is(
                                 typeof( __traits( getMember, Parent, member ) ) ==
-                                typeof( __traits( getMember, Child, member ) )
-                                ) )
+                                typeof( __traits( getMember, Child, member ) ) ) )
                             {
-                                //pragma( msg, "Member type mismatch " ~ Child.stringof ~ ":" ~ member ~ "::" ~ typeof(__traits( getMember, Parent, member )).stringof );
+                                debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Type mismatch.", file, line ) );
                                 return false;
                             }
                         }
                         else
                         {
-                            //pragma( msg, "Member missing " ~ Child.stringof ~ ":" ~ member );
+                            debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Member missing.", file, line ) );
                             return false;
                         }
                     }

@@ -9,5 +9,23 @@
 
     "dependencies": {
         "tested": { "version": "~>0.9", "optional": true }
+    },
+
+    "buildTypes": {
+        "debug": {
+            "buildOptions": [ "debugMode", "debugInfo" ],
+            "buildRequirements": [ "allowWarnings" ],
+            "debugVersions": [ "quack" ]
+        },
+        "unittest": {
+            "buildOptions": [ "debugMode", "debugInfo", "unittests" ],
+            "buildRequirements": [ "allowWarnings" ],
+            "debugVersions": [ "quack" ]
+        },
+        "unittest-cov": {
+            "buildOptions": [ "debugMode", "debugInfo", "unittests", "coverage" ],
+            "buildRequirements": [ "allowWarnings" ],
+            "debugVersions": [ "quack" ]
+        }
     }
 }

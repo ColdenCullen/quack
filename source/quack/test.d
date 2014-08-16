@@ -62,6 +62,7 @@ unittest
 {
     assert( hasSameMembers!( StructWithMethod1, StructWithMethod2 ) );
     assert( hasSameMembers!( StructWithMethod2, StructWithMethod1 ) );
+    assert( !hasSameMembers!( EmptyStruct1, StructWithMethod1 ) );
 }
 
 @name( "extends" )
