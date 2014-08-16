@@ -43,16 +43,16 @@ template hasTemplateMixin( Child, alias mix )
  * Returns:
  *      Whether Child has all the members of mix.
  */
-template hasStringMixin( Base, string mix )
+template hasStringMixin( Child, string mix )
 {
-    static if( isExtendable!Base )
+    static if( isExtendable!Child )
     {
         struct MixinImpl
         {
             mixin( mix );
         }
 
-        enum hasStringMixin = hasSameMembers!( Base, MixinImpl );
+        enum hasStringMixin = hasSameMembers!( Child, MixinImpl );
     }
     else
     {
