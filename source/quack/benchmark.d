@@ -11,7 +11,7 @@ private:
 
 import quack, tested;
 
-uint executionTimes = 10_000_000;
+uint executionTimes = 100_000_000;
 interface IFace
 {
     void memberFunction();
@@ -33,9 +33,10 @@ unittest
         impl.memberFunction();
     }
 
+    IFace c = new Class;
     foreach( i; 0..executionTimes )
     {
-        callMember( new Class );
+        callMember( c );
     }
 }
 
@@ -47,9 +48,10 @@ unittest
         impl.memberFunction();
     }
 
+    Class c = new Class;
     foreach( i; 0..executionTimes )
     {
-        callMember( new Class );
+        callMember( c );
     }
 }
 
@@ -61,8 +63,24 @@ unittest
         impl.memberFunction();
     }
 
+    Struct s;
     foreach( i; 0..executionTimes )
     {
-        callMember( Struct() );
+        callMember( s );
+    }
+}
+
+@name( "DuckPointer Benchmark" )
+unittest
+{
+    void callMember( DuckPointer!IFace impl )
+    {
+        impl.memberFunction();
+    }
+
+    auto ptr = duck!IFace( new Struct );
+    foreach( i; 0..executionTimes )
+    {
+        callMember( ptr );
     }
 }
