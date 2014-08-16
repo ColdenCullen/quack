@@ -85,8 +85,56 @@ template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __
                                 typeof( __traits( getMember, Parent, member ) ) ==
                                 typeof( __traits( getMember, Child, member ) ) ) )
                             {
-                                debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Type mismatch.", file, line ) );
-                                return false;
+                                // If function and type mismatch, check components for validity.
+                                static if( isSomeFunction!( __traits( getMember, Parent, member ) ) )
+                                {
+                                    // Check for return type mismatch.
+                                    static if( !is( ReturnType!( __traits( getMember, Child, member ) ) ==
+                                                    ReturnType!( __traits( getMember, Parent, member ) ) ) )
+                                    {
+                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Return type mismatch.", file, line ) );
+                                        return false;
+                                    }
+
+                                    // Check for parameter type mismatch.
+                                    static if( !is( ParameterTypeTuple!( __traits( getMember, Child, member ) ) ==
+                                                    ParameterTypeTuple!( __traits( getMember, Parent, member ) ) ) )
+                                    {
+                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Parameter type mismatch.", file, line ) );
+                                        return false;
+                                    }
+
+                                    // Check for attribute mismatch.
+                                    enum childAttr = functionAttributes!( __traits( getMember, Child, member ) );
+                                    enum parentAttr = functionAttributes!( __traits( getMember, Parent, member ) );
+                                    static if( childAttr == FunctionAttribute.none && parentAttr != FunctionAttribute.none )
+                                    {
+                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member,
+                                            "Attribute mismatch: " ~ extractFlags!( FunctionAttribute, childAttr ).to!string ~
+                                            ":" ~ extractFlags!( FunctionAttribute, parentAttr ).to!string, file, line ) );
+                                        return false;
+                                    } else {
+
+                                    // Check for safety.
+                                    static if( isSafe!( __traits( getMember, Parent, member ) ) && isUnsafe!( __traits( getMember, Child, member ) ) )
+                                    {
+                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Function safety mismatch.", file, line ) );
+                                        return false;
+                                    } else {
+
+                                    // Check for @property.
+                                    static if( ( parentAttr & FunctionAttribute.property ) && !( childAttr & FunctionAttribute.property ) )
+                                    {
+                                        debug( quack ) pragma( msg, memberMismatchError!( Child, member, "@property mismatch.", file, line ) );
+                                        return false;
+                                    }
+                                    } }
+                                }
+                                else
+                                {
+                                    debug( quack ) pragma( msg, memberMismatchError!( Child, member, "Type mismatch.", file, line ) );
+                                    return false;
+                                }
                             }
                         }
                         else

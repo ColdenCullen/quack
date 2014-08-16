@@ -65,6 +65,21 @@ unittest
     assert( !hasSameMembers!( EmptyStruct1, StructWithMethod1 ) );
 }
 
+@name( "hasSameMembers Attributes" )
+unittest
+{
+    struct Parent
+    {
+        void method() { }
+    }
+    struct Child
+    {
+        void method() @safe pure nothrow { }
+    }
+    //assert( hasSameMembers!( Child, Parent ) );
+    assert( !hasSameMembers!( Parent, Child ) );
+}
+
 @name( "extends" )
 unittest
 {
