@@ -12,17 +12,18 @@ import quack.extends;
  * Params:
  *      Child =         The base class to test.
  *      mix =           The mixin to test for.
+ *      MixinArgs =     The arguments to pass to the template mixin.
  *
  * Returns:
  *      Whether Child has all the members of mix.
  */
-template hasTemplateMixin( Child, alias mix )
+template hasTemplateMixin( Child, alias mix, MixinArgs... )
 {
     static if( isExtendable!Child )
     {
         struct MixinImpl
         {
-            mixin mix!();
+            mixin mix!( MixinArgs );
         }
 
         enum hasTemplateMixin = hasSameMembers!( Child, MixinImpl );

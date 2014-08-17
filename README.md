@@ -14,7 +14,7 @@ like a duck, then it's probably a duck." The idea is that if a `struct` or
 #### Usage
 
 Duck exists so that you may treat non-related types as polymorphic, at compile
-time. There are two primary ways to use quack:
+time. There are three primary ways to use quack:
 
 1) Taking objects as arguments: For this, you should use `extends!( A, B )`,
 which returns true if A "extends" B. It can do this by implementing all of the
@@ -26,6 +26,11 @@ which can be created with `duck!A( B b )`, assuming B "extends" A (the actual
 check is done using `extends`, so see the docs on that). Note that this approach
 should only be used when you need to actually store the object, as it is much
 slower than the pure template approach.
+
+3) Checking for the presence of a mixin: For this, you'll want
+`hasStringMixin!( A, mix )` or `hasTemplateMixin!( A, mix )`. These two
+templates will instantiate a struct with the given mixin, `mix`, and check if it is
+compatible with the type given, `A`.
 
 #### Examples
 
@@ -66,5 +71,45 @@ void main()
 
   auto aHolder1 = new HolderOfA( duck!Base( Child1() ) );
   auto aHolder2 = new HolderOfA( duck!Base( Child2() ) );
+}
+```
+
+```d
+import quack;
+import std.stdio;
+
+enum myStringMixin = q{
+    void stringMember();
+};
+
+mixin template MyTemplateMixin( MemberType )
+{
+    MemberType templateMember;
+}
+
+void doAThing( T )( T t ) if( hasTemplateMixin!( T, MyTemplateMixin, float ) )
+{
+    // Doing a thing...
+}
+
+void doAnotherThing( T )( T t ) if( hasStringMixin!( T, myStringMixin ) )
+{
+    // Still doing things...
+}
+
+struct TemplateMixinImpl
+{
+    mixin MyTemplateMixin!float;
+}
+
+struct StringMixinImpl
+{
+    mixin( myStringMixin );
+}
+
+void main()
+{
+    doAThing( TemplateMixinImpl() );
+    doAnotherThing( StringMixinImpl() );
 }
 ```
