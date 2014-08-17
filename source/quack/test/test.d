@@ -1,7 +1,7 @@
 /**
  * Contains all unit tests for quack.
  */
-module quack.test;
+module quack.test.test;
 version( unittest ):
 private:
 

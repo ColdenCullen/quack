@@ -1,7 +1,7 @@
 /**
  * Contains various benchmarks.
  */
-module quack.benchmark;
+module quack.test.benchmark;
 
 // The following tests are just benchmarks, and without tested no time results
 // are given.
