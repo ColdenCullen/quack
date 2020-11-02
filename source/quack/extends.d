@@ -34,16 +34,19 @@ template extends( Child, Parent, string file = __FILE__, size_t line = __LINE__ 
  *      Whether Child has an alias this of Parent.
  */
 enum hasAliasThis( Child, Parent, string file = __FILE__, size_t line = __LINE__ ) = {
+    bool result = false;
     static if( isExtendable!( Child, Parent ) )
     {
         foreach( alias_; __traits( getAliasThis, Child ) )
         {
-            if( is( typeof( __traits( getMember, Child, alias_ ) ) : Parent ) )
-                return true;
+            if( is( typeof( __traits( getMember, Child, alias_ ) ) : Parent ) ) {
+                result = true;
+                break;
+            }
         }
     }
 
-    return false;
+    return result;
 } ();
 
 /**
@@ -84,68 +87,61 @@ template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __
                     static if( member.among( "this", "~this", "Monitor" ) )
                     {
                         continue;
-                    } else {
-
+                    }
                     // If Child has the member, check the type.
-                    static if( !__traits( hasMember, Child, member ) )
+                    else static if( !__traits( hasMember, Child, member ) )
                     {
                         mixin( error!"Member missing." );
-                    } else {
-
+                    }
                     // If member, make sure they are the same type.
-                    static if( is(
+                    else static if( is(
                         typeof( __traits( getMember, Parent, member ) ) ==
                         typeof( __traits( getMember, Child, member ) ) ) )
                     {
                         return true;
-                    } else {
-
+                    }
                     // If not function, give up.
-                    static if( !isSomeFunction!( __traits( getMember, Parent, member ) ) )
+                    else static if( !isSomeFunction!( __traits( getMember, Parent, member ) ) )
                     {
                         mixin( error!"Type mismatch." );
-                    } else {
-
+                    }
                     // Check for return type mismatch.
-                    static if( !is( ReturnType!( __traits( getMember, Child, member ) ) ==
+                    else static if( !is( ReturnType!( __traits( getMember, Child, member ) ) ==
                                     ReturnType!( __traits( getMember, Parent, member ) ) ) )
                     {
                         mixin( error!"Return type mismatch." );
-                    } else {
-
+                    }
                     // Check for parameter type mismatch.
-                    static if( !is( ParameterTypeTuple!( __traits( getMember, Child, member ) ) ==
+                    else static if( !is( ParameterTypeTuple!( __traits( getMember, Child, member ) ) ==
                                     ParameterTypeTuple!( __traits( getMember, Parent, member ) ) ) )
                     {
                         mixin( error!"Parameter type mismatch." );
-                    } else {
-
-                    // Check for attribute mismatch.
-                    enum childAttr = functionAttributes!( __traits( getMember, Child, member ) );
-                    enum parentAttr = functionAttributes!( __traits( getMember, Parent, member ) );
-                    static if( childAttr == FunctionAttribute.none && parentAttr != FunctionAttribute.none )
-                    {
-                        mixin( error!( "Attribute mismatch: " ~ extractFlags!( FunctionAttribute, childAttr ).to!string ~
-                            ":" ~ extractFlags!( FunctionAttribute, parentAttr ).to!string ) );
-                    } else {
-
+                    }
                     // Check for safety.
-                    static if( isSafe!( __traits( getMember, Parent, member ) ) && isUnsafe!( __traits( getMember, Child, member ) ) )
+                    else static if( isSafe!( __traits( getMember, Parent, member ) ) && isUnsafe!( __traits( getMember, Child, member ) ) )
                     {
                         mixin( error!"Function safety mismatch." );
-                    } else {
-
-                    // Check for @property.
-                    static if( ( parentAttr & FunctionAttribute.property ) && !( childAttr & FunctionAttribute.property ) )
-                    {
-                        mixin( error!"@property mismatch." );
                     }
-
-                    // This sucks, but is required to avoid "statement is not reachable" warning.
-                    } } } } } } } }
+                    // Check for attribute mismatch.
+                    else
+                    {
+                        enum childAttr = functionAttributes!( __traits( getMember, Child, member ) );
+                        enum parentAttr = functionAttributes!( __traits( getMember, Parent, member ) );
+                        static if( childAttr == FunctionAttribute.none && parentAttr != FunctionAttribute.none )
+                        {
+                            mixin( error!( "Attribute mismatch: " ~ extractFlags!( FunctionAttribute, childAttr ).to!string ~
+                                ":" ~ extractFlags!( FunctionAttribute, parentAttr ).to!string ) );
+                        }
+                        else static if( ( parentAttr & FunctionAttribute.property ) && !( childAttr & FunctionAttribute.property ) )
+                        {
+                            mixin( error!"@property mismatch." );
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
                 }
-
-                return true;
             }
         } ();
     }
@@ -165,13 +161,15 @@ template hasSameMembers( Child, Parent, string file = __FILE__, size_t line = __
  *      Whether or not all of Classes are structs or classes.
  */
 package enum isExtendable( Classes... ) = {
+    bool result = true;
     foreach( klass; Classes )
     {
         if( !is( klass == struct ) && !is( klass == class ) && !is( klass == interface ) )
         {
-            return false;
+            result = false;
+            break;
         }
     }
 
-    return true;
+    return result;
 } ();
