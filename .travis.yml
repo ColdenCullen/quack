@@ -1,19 +1,19 @@
+sudo: false
 language: d
+d:
+  - dmd
+  - ldc
 os:
   - linux
   - osx
-install:
-  - echo $TRAVIS_OS_NAME $TRAVIS_JOB_ID
-  - bash .travis/setup_linux.sh
-  - bash .travis/setup_osx.sh
-  - sudo dub fetch tested
-  - sudo dub fetch doveralls
-  # Install new dub
-  - git clone https://github.com/D-Programming-Language/dub
-  - cd dub && dub build
-  - cd ..
-script: sudo ./dub/bin/dub test -q --coverage
-after_success: sudo dub run doveralls -- -p `pwd` -j $TRAVIS_JOB_ID
+
+script: 
+  - dub test --compiler=${DC} --coverage
+
+after_success:
+  - dub fetch doveralls
+  - dub run doveralls -- -p `pwd` -j $TRAVIS_JOB_ID
+
 notifications:
   webhooks:
     urls:
